@@ -111,6 +111,74 @@ def discovery_status(job_id: str):
         return JSONResponse({"error": "not found"}, status_code=404)
     return jobs[job_id]
 
+@app.post("/discovery/{job_id}/mark-false-positive")
+def mark_false_positive(job_id: str, request: dict):
+    """Mark a broker result as a false positive"""
+    print(f"Marking broker {request['broker_id']} as false positive for job {job_id}")
+    
+    findings_file = STORE_DIR / "findings.json"
+    if findings_file.exists():
+        findings = json.loads(findings_file.read_text())
+        
+        # Find and update the specific result
+        for result in findings.get(job_id, []):
+            if result.get('broker_id') == request['broker_id']:
+                result['marked_false_positive'] = True
+                result['confidence'] = 0.0  # Reset confidence
+                break
+        
+        findings_file.write_text(json.dumps(findings, indent=2))
+        print(f"Successfully marked broker {request['broker_id']} as false positive")
+        return {"success": True}
+    
+    return {"success": False, "error": "Findings not found"}
+
+@app.post("/discovery/{job_id}/verify-positive")
+def verify_positive(job_id: str, request: dict):
+    """Verify a broker result as a true positive"""
+    print(f"Verifying broker {request['broker_id']} as true positive for job {job_id}")
+    
+    findings_file = STORE_DIR / "findings.json"
+    if findings_file.exists():
+        findings = json.loads(findings_file.read_text())
+        
+        # Find and update the specific result
+        for result in findings.get(job_id, []):
+            if result.get('broker_id') == request['broker_id']:
+                result['verified_positive'] = True
+                result['confidence'] = min(1.0, result.get('confidence', 0.5) + 0.2)  # Boost confidence
+                break
+        
+        findings_file.write_text(json.dumps(findings, indent=2))
+        print(f"Successfully verified broker {request['broker_id']} as true positive")
+        return {"success": True}
+    
+    return {"success": False, "error": "Findings not found"}
+
+@app.post("/discovery/{job_id}/verify-positive")  
+def verify_positive(job_id: str, broker_id: int):
+    """Mark a discovery result as verified true positive"""
+    jobs = load_json(FINDINGS_JSON, {})
+    if job_id not in jobs:
+        return JSONResponse({"error": "job not found"}, status_code=404)
+    
+    job = jobs[job_id]
+    items = job.get("items", [])
+    
+    # Find and update the item
+    for item in items:
+        if item.get("broker_id") == broker_id:
+            item["verified_positive"] = True
+            item["confidence"] = min(1.0, item.get("confidence", 0.5) + 0.2)  # Boost confidence
+            item["notes"] = (item.get("notes", "") + " [VERIFIED_BY_USER]").strip()
+            break
+    
+    # Save updated job
+    jobs[job_id] = job
+    save_json(FINDINGS_JSON, jobs)
+    
+    return {"success": True, "message": f"Marked broker {broker_id} as verified positive"}
+
 
 def _run_discovery(job_id: str, profile_id: str, scope: Optional[List[int]]):
     from .discovery.search_playwright import search_broker

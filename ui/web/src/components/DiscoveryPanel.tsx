@@ -1,17 +1,23 @@
 
 import React from 'react'
 import FindingsTable from './FindingsTable'
+import ProfileForm from './ProfileForm'
 
 export default function DiscoveryPanel(){
   const [profileId, setProfileId] = React.useState<string>("")
   const [profiles, setProfiles] = React.useState<any[]>([])
   const [job, setJob] = React.useState<string|undefined>(undefined)
   const [progress, setProgress] = React.useState<number>(0)
-  const [items, setItems] = React.useState<any[]>([])
+  const [findings, setFindings] = React.useState<any[]>([])
+  const [showProfileForm, setShowProfileForm] = React.useState<boolean>(false)
 
   React.useEffect(()=>{
-    fetch("http://127.0.0.1:5179/pii-profiles").then(r=>r.json()).then(setProfiles)
+    loadProfiles()
   }, [])
+
+  function loadProfiles(){
+    fetch("http://127.0.0.1:5179/pii-profiles").then(r=>r.json()).then(setProfiles)
+  }
 
   function startDiscovery(){
     if(!profileId){ alert("Create/select a PII profile first"); return; }
@@ -21,7 +27,7 @@ export default function DiscoveryPanel(){
       const t = setInterval(async ()=>{
         const s = await fetch(`http://127.0.0.1:5179/discovery/${job_id}`).then(r=>r.json())
         setProgress(s.progress||0)
-        setItems(s.items||[])
+        setFindings(s.items||[])
         if(s.status === "completed"){ clearInterval(t) }
       }, 800)
     })
@@ -31,8 +37,32 @@ export default function DiscoveryPanel(){
     fetch("http://127.0.0.1:5179/pii-profiles", {
       method:"POST",
       headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({label:"Me", names:["John Q Public"], emails:["john@example.com"], phones:["(555) 123-4567"], addresses:[{city:"Oakland"}]})
-    }).then(()=> fetch("http://127.0.0.1:5179/pii-profiles").then(r=>r.json()).then(setProfiles))
+      body: JSON.stringify({label:"Demo Profile", names:["John Q Public"], emails:["john@example.com"], phones:["(555) 123-4567"], addresses:[{city:"Oakland"}]})
+    }).then(()=> loadProfiles())
+  }
+
+  function saveProfile(profileData: any) {
+    fetch("http://127.0.0.1:5179/pii-profiles", {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(profileData)
+    })
+    .then(response => {
+      if (response.ok) {
+        setShowProfileForm(false)
+        loadProfiles()
+        return response.json()
+      }
+      throw new Error('Failed to save profile')
+    })
+    .then(newProfile => {
+      // Auto-select the new profile
+      setProfileId(newProfile.id)
+    })
+    .catch(error => {
+      console.error('Error saving profile:', error)
+      alert('Failed to save profile. Please try again.')
+    })
   }
 
   function planRemoval(ids:number[]){
@@ -115,7 +145,25 @@ export default function DiscoveryPanel(){
             e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)"
           }}
         >
-          📝 Quick Create Profile
+          📝 Quick Demo Profile
+        </button>
+        
+        <button 
+          onClick={() => setShowProfileForm(true)}
+          style={{
+            ...buttonStyle,
+            background: "linear-gradient(135deg, #9f7aea 0%, #805ad5 100%)"
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = "translateY(-2px)"
+            e.currentTarget.style.boxShadow = "0 4px 8px rgba(0,0,0,0.15)"
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = "translateY(0)"
+            e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)"
+          }}
+        >
+          ➕ Create New Profile
         </button>
         
         <button 
@@ -172,9 +220,84 @@ export default function DiscoveryPanel(){
         )}
       </div>
 
+      {/* Selected Profile Info */}
+      {profileId && (
+        <div style={{
+          background: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
+          borderRadius: "12px",
+          padding: "16px",
+          marginBottom: "20px",
+          border: "1px solid #bae6fd"
+        }}>
+          {(() => {
+            const selectedProfile = profiles.find(p => p.id === profileId)
+            if (!selectedProfile) return null
+            
+            return (
+              <div>
+                <h4 style={{
+                  color: "#0369a1",
+                  fontSize: "1.1rem",
+                  marginBottom: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px"
+                }}>
+                  👤 Selected Profile: {selectedProfile.label}
+                </h4>
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                  gap: "12px",
+                  fontSize: "14px"
+                }}>
+                  {selectedProfile.names?.length > 0 && (
+                    <div>
+                      <strong style={{color: "#0369a1"}}>Names:</strong> {selectedProfile.names.join(", ")}
+                    </div>
+                  )}
+                  {selectedProfile.emails?.length > 0 && (
+                    <div>
+                      <strong style={{color: "#0369a1"}}>Emails:</strong> {selectedProfile.emails.join(", ")}
+                    </div>
+                  )}
+                  {selectedProfile.phones?.length > 0 && (
+                    <div>
+                      <strong style={{color: "#0369a1"}}>Phones:</strong> {selectedProfile.phones.join(", ")}
+                    </div>
+                  )}
+                  {selectedProfile.addresses?.length > 0 && (
+                    <div>
+                      <strong style={{color: "#0369a1"}}>Addresses:</strong> {selectedProfile.addresses.map((addr: any) => 
+                        Object.values(addr).filter(Boolean).join(", ")
+                      ).join(" | ")}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })()}
+        </div>
+      )}
+
       <div style={{marginTop: "20px"}}>
-        <FindingsTable data={items} onProceed={planRemoval} />
+        <FindingsTable 
+          data={findings}
+          jobId={job}
+          onProceed={(selectedIds: number[]) => {
+            console.log('Proceeding with', selectedIds)
+            planRemoval(selectedIds)
+          }}
+        />
       </div>
+
+      {/* Profile Creation Form Modal */}
+      {showProfileForm && (
+        <ProfileForm
+          onSave={saveProfile}
+          onCancel={() => setShowProfileForm(false)}
+        />
+      )}
     </div>
   )
 }
