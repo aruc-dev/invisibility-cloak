@@ -1,0 +1,14 @@
+\
+{
+  "name": "local-data-removal-electron",
+  "version": "0.0.1",
+  "main": "main.ts",
+  "private": true,
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^31.3.0",
+    "typescript": "^5.4.5"
+  }
+}
