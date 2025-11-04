@@ -3,12 +3,30 @@ import React from 'react'
 import FindingsTable from './FindingsTable'
 import ProfileForm from './ProfileForm'
 
-export default function DiscoveryPanel(){
+type DiscoveryPanelProps = {
+  onProceedToRemoval?: (brokerIds: number[], profileId: string) => void
+  job?: string
+  progress?: number
+  findings?: any[]
+  brokerCount?: {current: number, total: number, currentName?: string}
+  onDiscoveryStateChange?: {
+    setJob: (job: string | undefined) => void
+    setProgress: (progress: number) => void
+    setFindings: (findings: any[]) => void
+    setBrokerCount: (count: {current: number, total: number, currentName?: string}) => void
+  }
+}
+
+export default function DiscoveryPanel({ 
+  onProceedToRemoval, 
+  job, 
+  progress = 0, 
+  findings = [], 
+  brokerCount = {current: 0, total: 0},
+  onDiscoveryStateChange 
+}: DiscoveryPanelProps){
   const [profileId, setProfileId] = React.useState<string>("")
   const [profiles, setProfiles] = React.useState<any[]>([])
-  const [job, setJob] = React.useState<string|undefined>(undefined)
-  const [progress, setProgress] = React.useState<number>(0)
-  const [findings, setFindings] = React.useState<any[]>([])
   const [showProfileForm, setShowProfileForm] = React.useState<boolean>(false)
 
   React.useEffect(()=>{
@@ -21,15 +39,30 @@ export default function DiscoveryPanel(){
 
   function startDiscovery(){
     if(!profileId){ alert("Create/select a PII profile first"); return; }
+    if(!onDiscoveryStateChange) return;
+    
+    onDiscoveryStateChange.setFindings([]) // Clear previous results
+    onDiscoveryStateChange.setProgress(0)
+    onDiscoveryStateChange.setBrokerCount({current: 0, total: 0})
+    
     fetch(`http://127.0.0.1:5179/discovery?profile_id=${profileId}`, {method:"POST"})
     .then(r=>r.json()).then(({job_id})=>{
-      setJob(job_id)
+      onDiscoveryStateChange.setJob(job_id)
       const t = setInterval(async ()=>{
         const s = await fetch(`http://127.0.0.1:5179/discovery/${job_id}`).then(r=>r.json())
-        setProgress(s.progress||0)
-        setFindings(s.items||[])
-        if(s.status === "completed"){ clearInterval(t) }
-      }, 800)
+        onDiscoveryStateChange.setProgress(s.progress||0)
+        onDiscoveryStateChange.setBrokerCount({
+          current: s.current_broker || 0,
+          total: s.total_brokers || 0,
+          currentName: s.current_broker_name
+        })
+        
+        // Only update findings when search is complete to avoid blinking
+        if(s.status === "completed"){ 
+          onDiscoveryStateChange.setFindings(s.items||[])
+          clearInterval(t) 
+        }
+      }, 2000) // Reduced frequency from 800ms to 2000ms (2 seconds)
     })
   }
 
@@ -66,11 +99,17 @@ export default function DiscoveryPanel(){
   }
 
   function planRemoval(ids:number[]){
-    fetch("http://127.0.0.1:5179/removals", {
-      method:"POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({profile_id: profileId, brokers: ids})
-    }).then(r=>r.json()).then(plan => alert("Removal plan drafted for "+plan.items.length+" brokers."))
+    if (onProceedToRemoval) {
+      // Use the new callback system for tab navigation
+      onProceedToRemoval(ids, profileId)
+    } else {
+      // Fallback to old alert system
+      fetch("http://127.0.0.1:5179/removals", {
+        method:"POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({profile_id: profileId, brokers: ids})
+      }).then(r=>r.json()).then(plan => alert("Removal plan drafted for "+plan.items?.length+" brokers."))
+    }
   }
 
   const buttonStyle = {
@@ -199,6 +238,9 @@ export default function DiscoveryPanel(){
             fontWeight: "500"
           }}>
             <span>📊 Progress: {progress}%</span>
+            {brokerCount.total > 0 && (
+              <span>🔍 {brokerCount.current}/{brokerCount.total} brokers</span>
+            )}
             {progress < 100 && (
               <div style={{
                 width: "100px",
@@ -284,6 +326,8 @@ export default function DiscoveryPanel(){
         <FindingsTable 
           data={findings}
           jobId={job}
+          isSearching={job !== undefined && progress < 100}
+          brokerCount={brokerCount}
           onProceed={(selectedIds: number[]) => {
             console.log('Proceeding with', selectedIds)
             planRemoval(selectedIds)

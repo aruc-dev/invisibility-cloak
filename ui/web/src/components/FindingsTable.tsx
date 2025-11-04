@@ -14,7 +14,7 @@ type Finding = {
   notes?: string
 }
 
-export default function FindingsTable({data, onProceed, jobId}:{ data: Finding[], onProceed:(ids:number[])=>void, jobId?: string }){
+export default function FindingsTable({data, onProceed, jobId, isSearching, brokerCount}:{ data: Finding[], onProceed:(ids:number[])=>void, jobId?: string, isSearching?: boolean, brokerCount?: {current: number, total: number, currentName?: string} }){
   const [selected, setSelected] = React.useState<number[]>([])
   const foundItems = data.filter(d=>d.found && !d.marked_false_positive)
   const toggle = (id:number)=> setSelected(s=> s.includes(id)? s.filter(x=>x!==id): [...s,id])
@@ -76,7 +76,7 @@ export default function FindingsTable({data, onProceed, jobId}:{ data: Finding[]
             alignItems: "center",
             gap: "8px"
           }}>
-            📋 Discovery Results ({foundItems.length} found out of {data.length} searched)
+            📋 Discovery Results {isSearching ? "(Searching...)" : `(${foundItems.length} found out of ${data.length} searched)`}
           </h4>
 
           <div style={{
@@ -309,7 +309,7 @@ export default function FindingsTable({data, onProceed, jobId}:{ data: Finding[]
         </>
       )}
       
-      {data.length === 0 && (
+      {data.length === 0 && !isSearching && (
         <div style={{
           textAlign: "center",
           padding: "40px",
@@ -317,6 +317,84 @@ export default function FindingsTable({data, onProceed, jobId}:{ data: Finding[]
           fontSize: "16px"
         }}>
           🔍 No results yet. Run discovery to search for your data across brokers.
+        </div>
+      )}
+      
+      {isSearching && (
+        <div style={{
+          textAlign: "center",
+          padding: "40px",
+          background: "linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%)",
+          borderRadius: "12px",
+          border: "1px solid #81e6d9",
+          color: "#234e52"
+        }}>
+          <div style={{fontSize: "48px", marginBottom: "16px"}}>⏳</div>
+          <h3 style={{marginBottom: "8px"}}>Discovery in Progress...</h3>
+          <p style={{margin: "0 0 20px 0", fontSize: "14px"}}>
+            Searching data broker websites for your personal information. This may take a few minutes.
+          </p>
+          
+          {/* Broker scanning progress */}
+          {brokerCount && brokerCount.total > 0 && (
+            <div style={{
+              background: "rgba(56, 178, 172, 0.15)",
+              borderRadius: "12px",
+              padding: "20px",
+              marginBottom: "20px",
+              border: "1px solid rgba(56, 178, 172, 0.3)"
+            }}>
+              <div style={{
+                fontSize: "16px",
+                fontWeight: "600",
+                marginBottom: "8px",
+                color: "#1a202c"
+              }}>
+                🔍 Scanning Brokers: {brokerCount.current} of {brokerCount.total}
+              </div>
+              
+              {/* Progress bar */}
+              <div style={{
+                width: "100%",
+                height: "8px",
+                background: "rgba(56, 178, 172, 0.2)",
+                borderRadius: "4px",
+                overflow: "hidden",
+                marginBottom: "12px"
+              }}>
+                <div style={{
+                  width: `${brokerCount.total > 0 ? (brokerCount.current / brokerCount.total) * 100 : 0}%`,
+                  height: "100%",
+                  background: "linear-gradient(90deg, #38b2ac, #319795)",
+                  borderRadius: "4px",
+                  transition: "width 0.5s ease"
+                }} />
+              </div>
+              
+              <div style={{
+                fontSize: "14px",
+                color: "#2d3748",
+                opacity: 0.8
+              }}>
+                {brokerCount.current < brokerCount.total 
+                  ? (brokerCount.currentName 
+                      ? `Currently scanning: ${brokerCount.currentName}`
+                      : `Currently scanning broker ${brokerCount.current + 1}...`)
+                  : "Finalizing results..."
+                }
+              </div>
+            </div>
+          )}
+          
+          <div style={{
+            display: "inline-block",
+            padding: "8px 16px",
+            background: "rgba(56, 178, 172, 0.1)",
+            borderRadius: "20px",
+            fontSize: "14px"
+          }}>
+            🔄 Please wait while we scan broker databases...
+          </div>
         </div>
       )}
     </div>
