@@ -1,6 +1,6 @@
 
 from .base import RemovalConnector
-from ..llm_engine import smart_llm
+from ...llm_engine import smart_llm
 from datetime import datetime
 from pathlib import Path
 
