@@ -43,20 +43,136 @@ export default function DiscoveryPanel(){
     }).then(r=>r.json()).then(plan => alert("Removal plan drafted for "+plan.items.length+" brokers."))
   }
 
+  const buttonStyle = {
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "white",
+    border: "none",
+    padding: "10px 20px",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "500",
+    transition: "all 0.3s ease",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+  }
+
+  const selectStyle = {
+    padding: "10px 15px",
+    borderRadius: "8px",
+    border: "2px solid #e2e8f0",
+    fontSize: "14px",
+    background: "white",
+    color: "#333",
+    cursor: "pointer",
+    minWidth: "200px"
+  }
+
   return (
     <div>
-      <h3>Discovery</h3>
-      <div style={{display:"flex", gap:8, alignItems:"center"}}>
-        <select value={profileId} onChange={e=>setProfileId(e.target.value)}>
+      <h3 style={{
+        color: "#2d3748",
+        fontSize: "1.5rem",
+        marginBottom: "20px",
+        display: "flex",
+        alignItems: "center",
+        gap: "10px"
+      }}>
+        🔍 Discovery & Search
+      </h3>
+      
+      <div style={{
+        display: "flex", 
+        gap: "15px", 
+        alignItems: "center",
+        flexWrap: "wrap",
+        marginBottom: "20px",
+        padding: "20px",
+        background: "linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%)",
+        borderRadius: "12px",
+        border: "1px solid #e2e8f0"
+      }}>
+        <select 
+          value={profileId} 
+          onChange={e=>setProfileId(e.target.value)}
+          style={selectStyle}
+        >
           <option value="">Select profile...</option>
           {profiles.map((p:any)=> <option key={p.id} value={p.id}>{p.label}</option>)}
         </select>
-        <button onClick={createDummyProfile}>Quick Create Dummy Profile</button>
-        <button onClick={startDiscovery}>Run Discovery</button>
-        {job && <span>Progress: {progress}%</span>}
+        
+        <button 
+          onClick={createDummyProfile}
+          style={{
+            ...buttonStyle,
+            background: "linear-gradient(135deg, #48bb78 0%, #38a169 100%)"
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = "translateY(-2px)"
+            e.currentTarget.style.boxShadow = "0 4px 8px rgba(0,0,0,0.15)"
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = "translateY(0)"
+            e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)"
+          }}
+        >
+          📝 Quick Create Profile
+        </button>
+        
+        <button 
+          onClick={startDiscovery}
+          style={{
+            ...buttonStyle,
+            background: "linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)",
+            fontSize: "16px",
+            fontWeight: "600"
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = "translateY(-2px)"
+            e.currentTarget.style.boxShadow = "0 4px 8px rgba(0,0,0,0.15)"
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = "translateY(0)"
+            e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)"
+          }}
+        >
+          🚀 Run Discovery
+        </button>
+        
+        {job && (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "8px 16px",
+            background: progress === 100 ? "#48bb78" : "#667eea",
+            color: "white",
+            borderRadius: "20px",
+            fontSize: "14px",
+            fontWeight: "500"
+          }}>
+            <span>📊 Progress: {progress}%</span>
+            {progress < 100 && (
+              <div style={{
+                width: "100px",
+                height: "6px",
+                background: "rgba(255,255,255,0.3)",
+                borderRadius: "3px",
+                overflow: "hidden"
+              }}>
+                <div style={{
+                  width: `${progress}%`,
+                  height: "100%",
+                  background: "white",
+                  borderRadius: "3px",
+                  transition: "width 0.3s ease"
+                }} />
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      <div style={{marginTop:16}}>
+      <div style={{marginTop: "20px"}}>
         <FindingsTable data={items} onProceed={planRemoval} />
       </div>
     </div>
