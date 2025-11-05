@@ -2,6 +2,7 @@
 import React from 'react'
 import FindingsTable from './FindingsTable'
 import ProfileForm from './ProfileForm'
+import { BrokerProfileSelector } from './BrokerProfileSelector'
 
 type DiscoveryPanelProps = {
   onProceedToRemoval?: (brokerIds: number[], profileId: string) => void
@@ -28,13 +29,20 @@ export default function DiscoveryPanel({
   const [profileId, setProfileId] = React.useState<string>("")
   const [profiles, setProfiles] = React.useState<any[]>([])
   const [showProfileForm, setShowProfileForm] = React.useState<boolean>(false)
+  const [selectedBrokerProfile, setSelectedBrokerProfile] = React.useState<string>("quick_scan")
+  const [brokerProfiles, setBrokerProfiles] = React.useState<any>({})
 
   React.useEffect(()=>{
     loadProfiles()
+    loadBrokerProfiles()
   }, [])
 
   function loadProfiles(){
     fetch("http://127.0.0.1:5179/pii-profiles").then(r=>r.json()).then(setProfiles)
+  }
+
+  function loadBrokerProfiles(){
+    fetch("http://127.0.0.1:5179/broker-profiles").then(r=>r.json()).then(setBrokerProfiles)
   }
 
   function startDiscovery(){
@@ -45,7 +53,12 @@ export default function DiscoveryPanel({
     onDiscoveryStateChange.setProgress(0)
     onDiscoveryStateChange.setBrokerCount({current: 0, total: 0})
     
-    fetch(`http://127.0.0.1:5179/discovery?profile_id=${profileId}`, {method:"POST"})
+    const params = new URLSearchParams({
+      profile_id: profileId,
+      broker_profile: selectedBrokerProfile
+    })
+    
+    fetch(`http://127.0.0.1:5179/discovery?${params}`, {method:"POST"})
     .then(r=>r.json()).then(({job_id})=>{
       onDiscoveryStateChange.setJob(job_id)
       const t = setInterval(async ()=>{
@@ -241,6 +254,9 @@ export default function DiscoveryPanel({
             {brokerCount.total > 0 && (
               <span>🔍 {brokerCount.current}/{brokerCount.total} brokers</span>
             )}
+            {brokerProfiles[selectedBrokerProfile] && (
+              <span>({brokerProfiles[selectedBrokerProfile].name})</span>
+            )}
             {progress < 100 && (
               <div style={{
                 width: "100px",
@@ -260,6 +276,21 @@ export default function DiscoveryPanel({
             )}
           </div>
         )}
+      </div>
+
+      {/* Broker Profile Selection - Always show */}
+      <div style={{
+        marginBottom: "20px",
+        padding: "20px",
+        background: "white",
+        borderRadius: "12px",
+        border: "1px solid #e2e8f0",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+      }}>
+        <BrokerProfileSelector
+          selectedProfile={selectedBrokerProfile}
+          onProfileSelect={setSelectedBrokerProfile}
+        />
       </div>
 
       {/* Selected Profile Info */}

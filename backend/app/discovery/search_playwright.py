@@ -4,7 +4,7 @@ from playwright.async_api import async_playwright
 from urllib.parse import urlparse, urlencode, quote_plus
 import os, re, time, hashlib, json
 
-DEFAULT_TIMEOUT = 30000
+DEFAULT_TIMEOUT = 10000  # Reduced from 15s to 10s for even faster discovery
 
 
 async def handle_overlays(page):
