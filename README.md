@@ -4,18 +4,23 @@ A privacy-focused tool for discovering and removing your personal information fr
 
 ## 🎯 Features
 
-- **Automated Discovery**: Search 658+ data broker websites for your personal information
+- **Automated Discovery**: Search 658+ data broker websites for your personal information with real-time progress tracking
+- **Smart Progress Display**: Live broker count (e.g., "🔍 1/658 brokers") and current broker name during discovery
+- **State Preservation**: Discovery progress maintained across tab navigation in the UI
 - **Evidence Collection**: Screenshot and document findings for removal requests
-- **Opt-out Assistance**: Generate removal requests and track progress
+- **AI-Powered Removal**: Generate CCPA/CPRA compliant opt-out emails with dual LLM support (Ollama + OpenAI)
+- **Comprehensive Removal Workflow**: End-to-end process from discovery to email generation with job tracking
 - **Local-First**: All data stays on your machine - no cloud uploads
-- **LLM-Powered**: Uses AI to help classify findings and generate removal content
+- **Enhanced UI**: Modern React interface with tab navigation and real-time updates
 
 ## 🏗️ Architecture
 
-- **Backend**: FastAPI (Python) with Playwright for web scraping
-- **Frontend**: React + TypeScript with Vite
-- **Storage**: Local JSON files (no database required)
-- **AI**: Ollama primary, OpenAI fallback for LLM features
+- **Backend**: FastAPI (Python) with Playwright for web scraping and comprehensive API endpoints
+- **Frontend**: React + TypeScript with Vite, featuring tab navigation and global state management
+- **Discovery Engine**: Enhanced with real-time progress tracking and broker name display
+- **Removal System**: Complete workflow with AI-powered email generation and job monitoring
+- **Storage**: Local JSON files (no database required) with organized evidence collection
+- **AI Integration**: Dual LLM setup (Ollama primary, OpenAI fallback) with smart error handling
 
 ## 🚀 Quick Start
 
@@ -80,24 +85,30 @@ A privacy-focused tool for discovering and removing your personal information fr
 - **Port conflicts**: If port 5179 or 5173 are in use, kill processes with `lsof -ti:5179 | xargs kill -9`
 - **Missing dependencies**: The setup process will install required Python packages automatically
 - **Node.js issues**: Ensure you have Node.js v18+ installed (check with `node --version`)
-- **Discovery stuck at 0%**: If discovery doesn't start, you need to import brokers first:
-  ```bash
-  curl -X POST "http://localhost:5179/brokers/import"
-  ```
-  Verify with: `curl -s "http://localhost:5179/brokers" | python3 -c "import sys, json; print(f'Brokers: {len(json.load(sys.stdin))}')"`
+- **Discovery not starting**: If discovery appears stuck or doesn't show progress:
+  1. Import brokers first: `curl -X POST "http://localhost:5179/brokers/import"`
+  2. Verify broker count: `curl -s "http://localhost:5179/brokers" | python3 -c "import sys, json; print(f'Brokers: {len(json.load(sys.stdin))}')"`
+  3. Check backend logs for any UnboundLocalError or threading issues
+- **Frontend not updating**: Hard refresh (Cmd+Shift+R) or restart frontend if broker names don't appear
+- **Backend crashes**: Check for proper virtual environment activation and missing environment variables
 
-## � Creating Your Profile
+## 👤 Creating Your Profile
 
-Before running discovery, you need to create a PII profile with your personal information. Here are three ways to do it:
+Before running discovery, you need to create a PII profile with your personal information. You can now create profiles directly from the web interface or via API:
 
-### Method 1: Quick Demo Profile (Easiest)
+### Method 1: Create Profile in Web UI (Recommended)
 
 1. Open the web interface at http://localhost:5173
-2. Click **"Quick Create Dummy Profile"** button
-3. Select the created profile from the dropdown
-4. This creates a sample profile you can use for testing
+2. **Custom Profile**: Fill out the profile form with your personal information:
+   - **Label**: Display name for your profile (e.g., "My Profile", "John Smith")
+   - **Names**: Add all variations of your name (full name, nicknames, maiden names)
+   - **Emails**: Add all your email addresses (personal, work, old emails)
+   - **Phones**: Add your phone numbers
+   - **Addresses**: Add current and previous addresses
+3. **Quick Demo**: Alternatively, click **"Quick Create Dummy Profile"** for testing
+4. Select your created profile from the dropdown to use for discovery
 
-### Method 2: Custom Profile via API (Recommended)
+### Method 2: Custom Profile via API
 
 Create a profile with your actual information using the backend API:
 
@@ -115,7 +126,7 @@ curl -X POST "http://localhost:5179/pii-profiles" \
   }'
 ```
 
-### Method 3: Browser Console
+### Method 3: Browser Console (Advanced)
 
 1. Open http://localhost:5173 in your browser
 2. Open Developer Tools (F12) and go to Console
@@ -159,26 +170,50 @@ curl -X POST "http://localhost:5179/pii-profiles" \
 
 ## 📋 Usage
 
-1. **Create a PII Profile**: Follow the [Creating Your Profile](#-creating-your-profile) section above to add your personal information
-2. **Select Your Profile**: Choose your profile from the dropdown in the web interface
+1. **Create a PII Profile**: Use the web interface profile form at http://localhost:5173 to add your personal information, or follow the [Creating Your Profile](#-creating-your-profile) section for other methods
+2. **Select Your Profile**: Choose your created profile from the dropdown in the web interface
 3. **Import Data Brokers**: Load the 658 data brokers from official state registries:
    ```bash
    curl -X POST "http://localhost:5179/brokers/import"
    ```
    This should return: `{"imported": 658}`
-4. **Run Discovery**: Click "Run Discovery" to start automated Playwright-based search across data broker websites
-5. **Review Findings**: See which brokers have your data with confidence scores and evidence screenshots
-6. **Generate Removal Requests**: AI-powered email generation using Ollama (local) or OpenAI (fallback)
-7. **Track Progress**: Monitor your removal requests and save drafts to `backend/storage/drafts/`
+4. **Run Discovery**: Click "Run Discovery" to start automated search with real-time progress tracking
+   - See live broker count: "🔍 1/658 brokers"
+   - Watch current broker name being scanned
+   - Progress preserved when switching between Discovery and Removal tabs
+5. **Review Findings**: Examine results with confidence scores and evidence screenshots
+6. **Generate Removal Requests**: Use the Removal tab for AI-powered email generation:
+   - Select findings to create removal requests
+   - AI generates CCPA/CPRA compliant emails
+   - Track removal job progress with real-time updates
+7. **Monitor Progress**: Track removal jobs and save email drafts to `backend/storage/drafts/`
+
+### Enhanced Discovery Features
+
+- **Real-time Progress**: Live updates showing current broker being scanned
+- **Broker Count Display**: Visual progress indicator (e.g., "🔍 1/658 brokers")
+- **State Persistence**: Discovery progress maintained when navigating between tabs
+- **Comprehensive Tracking**: Current broker name, total progress, and job status
+
+### Removal Workflow
+
+- **Intelligent Selection**: Choose specific findings for removal requests
+- **AI Email Generation**: Automated CCPA/CPRA compliant email creation
+- **Job Monitoring**: Real-time status updates for removal requests
+- **Draft Management**: Organized storage of generated emails in local directories
 
 ### Key Features Tested
 
-- ✅ **FastAPI Backend**: Runs on port 5179 with auto-reload
-- ✅ **React Frontend**: Vite dev server on port 5173  
+- ✅ **FastAPI Backend**: Runs on port 5179 with auto-reload and comprehensive API endpoints
+- ✅ **React Frontend**: Vite dev server on port 5173 with modern tab navigation
+- ✅ **Real-time Discovery**: Live progress tracking with broker count and current broker name display
+- ✅ **State Management**: Global state preservation across tab navigation
+- ✅ **Bug-Fixed Discovery**: Resolved critical UnboundLocalError for reliable discovery execution
+- ✅ **Complete Removal Workflow**: End-to-end process from findings selection to AI email generation
 - ✅ **Data Broker Database**: 658 normalized brokers with search URLs and opt-out information
-- ✅ **AI Integration**: Dual LLM setup (Ollama primary, OpenAI fallback) for email generation
-- ✅ **Discovery System**: Automated web scraping with Playwright
-- ✅ **Local Storage**: All personal data stays on your machine
+- ✅ **Dual AI Integration**: Ollama (local) + OpenAI (fallback) with intelligent error handling
+- ✅ **Job Tracking**: Comprehensive monitoring for both discovery and removal operations
+- ✅ **Local Storage**: All personal data stays on your machine with organized file structure
 
 ## 🤖 AI Features
 
@@ -188,10 +223,12 @@ curl -X POST "http://localhost:5179/pii-profiles" \
 - **Smart Fallback**: Automatically switches to OpenAI if Ollama fails
 
 ### Email Generation
-- Generates CCPA/CPRA compliant opt-out emails
-- Personalized content under 160 words
-- Saves drafts to `backend/storage/drafts/`
-- Uses template prompts for consistency
+- Generates CCPA/CPRA compliant opt-out emails with legal accuracy
+- Personalized content under 160 words for optimal deliverability
+- Saves drafts to `backend/storage/drafts/` with organized file structure
+- Uses optimized template prompts for consistency and effectiveness
+- Intelligent job tracking with real-time status updates
+- Comprehensive error handling with detailed logging
 
 ### Environment Configuration
 ```bash
@@ -213,20 +250,65 @@ OPENAI_MODEL=gpt-4o-mini
 
 ```
 invisibility_cloak/
-├── backend/              # FastAPI Python backend
+├── backend/                 # FastAPI Python backend
 │   ├── app/
-│   │   ├── main.py      # API endpoints
-│   │   ├── discovery/   # Web scraping logic
-│   │   ├── removal/     # Opt-out automation
-│   │   └── llm_engine.py # AI integration
+│   │   ├── main.py         # Enhanced API endpoints with discovery/removal tracking
+│   │   ├── discovery/      # Web scraping logic with real-time progress
+│   │   ├── removal/        # Complete opt-out automation with AI integration
+│   │   └── llm_engine.py   # Dual LLM system (Ollama + OpenAI)
+│   ├── storage/
+│   │   ├── drafts/         # Generated removal emails
+│   │   └── evidence/       # Discovery screenshots and data
 │   └── requirements.txt
-├── ui/web/              # React frontend
+├── ui/web/                 # Modern React frontend
 │   ├── src/
-│   │   └── components/  # React components
+│   │   ├── components/     # Enhanced React components with state management
+│   │   │   ├── DiscoveryPanel.tsx    # Real-time progress tracking
+│   │   │   ├── RemovalPanel.tsx      # Complete removal workflow
+│   │   │   └── FindingsTable.tsx     # Results display with actions
+│   │   └── App.tsx         # Global state management and tab navigation
 │   └── package.json
-├── data/                # Data broker information
-└── storage/            # Local data (gitignored)
+├── data/                   # Normalized data broker information
+│   └── brokers_normalized.csv
+└── storage/               # Local runtime data (gitignored)
+    ├── brokers.json       # Loaded broker database
+    ├── findings.json      # Discovery results
+    └── profiles.json      # User PII profiles
 ```
+
+## 🆕 Recent Updates
+
+### v2.0 - Major Enhancement (November 2025)
+
+**🐛 Critical Bug Fixes:**
+- Fixed `UnboundLocalError` in discovery engine that prevented discovery from running
+- Resolved variable ordering issues in broker loading process
+- Enhanced error handling and logging throughout the application
+
+**✨ Discovery Improvements:**
+- **Real-time Progress Tracking**: Live broker count display (e.g., "🔍 1/658 brokers")
+- **Current Broker Display**: Shows the name of the broker currently being scanned
+- **State Persistence**: Discovery progress maintained when switching between tabs
+- **Enhanced API**: Added `current_broker`, `total_brokers`, and `current_broker_name` fields
+
+**🎨 UI/UX Enhancements:**
+- **Global State Management**: Lifted discovery state to App level for cross-tab persistence
+- **Tab Navigation**: Seamless switching between Discovery and Removal panels
+- **Profile Creation UI**: Complete profile creation form directly in the web interface
+- **Modern Interface**: Enhanced progress displays with real-time updates
+- **Improved Feedback**: Better visual indicators and status messages
+
+**🔧 Removal System Overhaul:**
+- **Complete Workflow**: End-to-end process from findings selection to email generation
+- **AI-Powered Generation**: Dual LLM support with intelligent fallback mechanisms
+- **Job Tracking**: Real-time monitoring of removal request progress
+- **Enhanced Email Templates**: CCPA/CPRA compliant with optimized prompts
+
+**🏗️ Backend Architecture:**
+- **Comprehensive API**: Full CRUD operations for profiles, discoveries, and removals
+- **Job Management**: Robust background job processing with status tracking
+- **Error Recovery**: Improved resilience and error handling
+- **Performance**: Optimized broker loading and processing
 
 ## 🤝 Contributing
 
