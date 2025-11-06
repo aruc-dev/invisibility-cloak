@@ -106,12 +106,12 @@ The discovery process has been revolutionized with intelligent broker profiles t
 |---------|---------|------|----------|
 | **⚡ Quick Essential Scan** | 15 | ~15 min | First-time users, immediate results |
 | **👥 People Search Focus** | 28 | ~30 min | Public directory exposure |
-| **💳 Financial & Credit** | 45 | ~45 min | Financial privacy concerns |
-| **🏠 Real Estate & Property** | 35 | ~35 min | Property record privacy |
-| **🏥 Healthcare & Medical** | 42 | ~40 min | Medical data privacy |
-| **💼 Professional & B2B** | 55 | ~55 min | Professional networking data |
-| **📊 Tech & Analytics** | 48 | ~50 min | Tech platform data tracking |
-| **📢 Marketing & Advertising** | 62 | ~1 hour | Marketing database removal |
+| **💳 Financial & Credit** | 39 | ~40 min | Financial privacy concerns |
+| **🏠 Real Estate & Property** | 25 | ~25 min | Property record privacy |
+| **🏥 Healthcare & Medical** | 20 | ~20 min | Medical data privacy |
+| **💼 Professional & B2B** | 58 | ~60 min | Professional networking data |
+| **📊 Tech & Analytics** | 81 | ~80 min | Tech platform data tracking |
+| **📢 Marketing & Advertising** | 87 | ~90 min | Marketing database removal |
 
 ### Smart Recommendations
 

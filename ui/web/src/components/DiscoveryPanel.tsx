@@ -74,20 +74,29 @@ export default function DiscoveryPanel({
     .then(r=>r.json()).then(({job_id})=>{
       onDiscoveryStateChange.setJob(job_id)
       const t = setInterval(async ()=>{
-        const s = await fetch(`http://127.0.0.1:5179/discovery/${job_id}`).then(r=>r.json())
-        onDiscoveryStateChange.setProgress(s.progress||0)
-        onDiscoveryStateChange.setBrokerCount({
-          current: s.current_broker || 0,
-          total: s.total_brokers || 0,
-          currentName: s.current_broker_name
-        })
-        
-        // Only update findings when search is complete to avoid blinking
-        if(s.status === "completed"){ 
-          onDiscoveryStateChange.setFindings(s.items||[])
-          clearInterval(t) 
+        try {
+          const s = await fetch(`http://127.0.0.1:5179/discovery/${job_id}`).then(r=>r.json())
+          onDiscoveryStateChange.setProgress(s.progress||0)
+          onDiscoveryStateChange.setBrokerCount({
+            current: s.current_broker || 0,
+            total: s.total_brokers || 0,
+            currentName: s.current_broker_name
+          })
+          
+          // Only update findings when search is complete to avoid blinking
+          if(s.status === "completed"){ 
+            onDiscoveryStateChange.setFindings(s.items||[])
+            clearInterval(t) 
+          }
+        } catch (error) {
+          console.error('Error polling discovery status:', error)
+          clearInterval(t)
         }
       }, 2000) // Reduced frequency from 800ms to 2000ms (2 seconds)
+    })
+    .catch(error => {
+      console.error('Error starting discovery:', error)
+      alert('Failed to start discovery. Please try again.')
     })
   }
 
@@ -96,7 +105,12 @@ export default function DiscoveryPanel({
       method:"POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify({label:"Demo Profile", names:["John Q Public"], emails:["john@example.com"], phones:["(555) 123-4567"], addresses:[{city:"Oakland"}]})
-    }).then(()=> loadProfiles())
+    })
+    .then(()=> loadProfiles())
+    .catch(error => {
+      console.error('Error creating dummy profile:', error)
+      alert('Failed to create demo profile. Please try again.')
+    })
   }
 
   function saveProfile(profileData: any) {
@@ -133,7 +147,13 @@ export default function DiscoveryPanel({
         method:"POST",
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify({profile_id: profileId, brokers: ids})
-      }).then(r=>r.json()).then(plan => alert("Removal plan drafted for "+plan.items?.length+" brokers."))
+      })
+      .then(r=>r.json())
+      .then(plan => alert("Removal plan drafted for "+plan.items?.length+" brokers."))
+      .catch(error => {
+        console.error('Error planning removal:', error)
+        alert('Failed to create removal plan. Please try again.')
+      })
     }
   }
 
