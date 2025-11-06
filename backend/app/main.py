@@ -7,6 +7,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+# Import broker profiles
+from .broker_profiles import (
+    get_broker_profiles, 
+    get_profile_by_name, 
+    filter_brokers_by_profile, 
+    get_profile_recommendations
+)
+
 APP_DIR = Path(__file__).resolve().parent
 DATA_DIR = APP_DIR.parent.parent / "data"
 STORE_DIR = APP_DIR.parent.parent / "storage"
@@ -148,20 +156,41 @@ def cancel_removal(job_id: str):
     else:
         return JSONResponse({"error": "Cannot cancel completed job"}, status_code=400)
 
+@app.get("/broker-profiles")
+def get_profiles():
+    """Get all available broker profiles for discovery"""
+    return get_broker_profiles()
+
 @app.post("/discovery")
-def start_discovery(profile_id: str, scope: Optional[List[int]] = None):
+def start_discovery(
+    profile_id: str, 
+    scope: Optional[List[int]] = None,
+    broker_profile: str = "all_brokers"
+):
+    """Start discovery with optional broker profile filtering"""
     jobs = load_json(FINDINGS_JSON, {})
     job_id = str(uuid.uuid4())
+    
+    # Get profile info for metadata
+    profile_info = None
+    if broker_profile != "all_brokers":
+        try:
+            profile_info = get_profile_by_name(broker_profile)
+        except ValueError:
+            profile_info = None
+    
     jobs[job_id] = {
         "status": "queued", 
         "progress": 0, 
         "items": [],
         "current_broker": 0,
         "total_brokers": 0,
-        "current_broker_name": ""
+        "current_broker_name": "",
+        "broker_profile": broker_profile,
+        "profile_info": profile_info
     }
     save_json(FINDINGS_JSON, jobs)
-    t = threading.Thread(target=_run_discovery, args=(job_id, profile_id, scope))
+    t = threading.Thread(target=_run_discovery, args=(job_id, profile_id, scope, broker_profile))
     t.daemon = True
     t.start()
     return {"job_id": job_id}
@@ -242,13 +271,19 @@ def verify_positive(job_id: str, broker_id: int):
     return {"success": True, "message": f"Marked broker {broker_id} as verified positive"}
 
 
-def _run_discovery(job_id: str, profile_id: str, scope: Optional[List[int]]):
+def _run_discovery(job_id: str, profile_id: str, scope: Optional[List[int]], broker_profile: str = "all_brokers"):
     from .discovery.search_playwright import search_broker
     evidence_dir = STORE_DIR / "evidence" / job_id
     evidence_dir.mkdir(parents=True, exist_ok=True)
 
     # Load brokers first
     brokers = load_json(BROKERS_JSON, [])
+    
+    # Apply broker profile filtering
+    if broker_profile != "all_brokers":
+        brokers = filter_brokers_by_profile(brokers, broker_profile)
+    
+    # Apply scope filtering if provided
     if scope:
         brokers = [b for idx, b in enumerate(brokers) if idx in scope]
 
@@ -266,6 +301,14 @@ def _run_discovery(job_id: str, profile_id: str, scope: Optional[List[int]]):
     items = []
     total = max(1, len(brokers))
     for i, b in enumerate(brokers):
+        # Update progress BEFORE starting broker search
+        jobs = load_json(FINDINGS_JSON, {})
+        jobs[job_id]["current_broker"] = i + 1
+        jobs[job_id]["total_brokers"] = total
+        jobs[job_id]["current_broker_name"] = b.get("name", "Unknown")
+        jobs[job_id]["progress"] = int((i/total)*100)  # Progress based on started brokers
+        save_json(FINDINGS_JSON, jobs)
+        
         try:
             res = search_broker(b, profile, str(evidence_dir))
             items.append({
@@ -278,6 +321,7 @@ def _run_discovery(job_id: str, profile_id: str, scope: Optional[List[int]]):
                 "screenshot_path": res.get("screenshot")
             })
         except Exception as e:
+            print(f"❌ Error searching {b.get('name', 'Unknown')}: {str(e)}")
             items.append({
                 "broker_name": b.get("name"),
                 "domain": b.get("domain"),
@@ -287,12 +331,11 @@ def _run_discovery(job_id: str, profile_id: str, scope: Optional[List[int]]):
                 "evidence_url": None,
                 "error": str(e)
             })
+        
+        # Update final results after broker completion
         jobs = load_json(FINDINGS_JSON, {})
         jobs[job_id]["items"] = items
-        jobs[job_id]["progress"] = int(((i+1)/total)*100)
-        jobs[job_id]["current_broker"] = i + 1
-        jobs[job_id]["total_brokers"] = total
-        jobs[job_id]["current_broker_name"] = b.get("name", "Unknown")
+        jobs[job_id]["progress"] = int(((i+1)/total)*100)  # Progress based on completed brokers
         save_json(FINDINGS_JSON, jobs)
 
     jobs = load_json(FINDINGS_JSON, {})

@@ -46,7 +46,7 @@ export default function RemovalPanel({ selectedBrokers, profileId, onBack }: Rem
 
   const loadPastJobs = async () => {
     try {
-      const response = await fetch('http://localhost:5179/removals')
+      const response = await fetch('http://127.0.0.1:5179/removals')
       const jobs = await response.json()
       const jobList = Object.entries(jobs).map(([id, job]: [string, any]) => ({
         job_id: id,
@@ -60,7 +60,7 @@ export default function RemovalPanel({ selectedBrokers, profileId, onBack }: Rem
 
   const fetchJobStatus = async (jobId: string) => {
     try {
-      const response = await fetch(`http://localhost:5179/removals/${jobId}`)
+      const response = await fetch(`http://127.0.0.1:5179/removals/${jobId}`)
       const job = await response.json()
       setCurrentJob({ job_id: jobId, ...job })
       
@@ -77,7 +77,7 @@ export default function RemovalPanel({ selectedBrokers, profileId, onBack }: Rem
 
     setIsStarting(true)
     try {
-      const response = await fetch('http://localhost:5179/removals', {
+      const response = await fetch('http://127.0.0.1:5179/removals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

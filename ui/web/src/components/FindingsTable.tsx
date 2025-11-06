@@ -23,7 +23,7 @@ export default function FindingsTable({data, onProceed, jobId, isSearching, brok
   const markFalsePositive = async (brokerId: number) => {
     if (!jobId) return
     try {
-      const response = await fetch(`http://localhost:5179/discovery/${jobId}/mark-false-positive`, {
+      const response = await fetch(`http://127.0.0.1:5179/discovery/${jobId}/mark-false-positive`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({broker_id: brokerId})
@@ -40,7 +40,7 @@ export default function FindingsTable({data, onProceed, jobId, isSearching, brok
   const verifyPositive = async (brokerId: number) => {
     if (!jobId) return
     try {
-      const response = await fetch(`http://localhost:5179/discovery/${jobId}/verify-positive`, {
+      const response = await fetch(`http://127.0.0.1:5179/discovery/${jobId}/verify-positive`, {
         method: 'POST', 
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({broker_id: brokerId})

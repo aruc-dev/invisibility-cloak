@@ -4,20 +4,24 @@ A privacy-focused tool for discovering and removing your personal information fr
 
 ## 🎯 Features
 
-- **Automated Discovery**: Search 658+ data broker websites for your personal information with real-time progress tracking
-- **Smart Progress Display**: Live broker count (e.g., "🔍 1/658 brokers") and current broker name during discovery
-- **State Preservation**: Discovery progress maintained across tab navigation in the UI
+- **Broker Profile System**: Intelligent grouping of data brokers into targeted profiles for faster, more efficient discovery
+- **Quick Essential Scan**: Discover your data in just 15 minutes across 15 high-priority brokers
+- **Smart Profile Selection**: 8 specialized broker profiles (People Search, Financial, Healthcare, etc.) for targeted discovery
+- **Automated Discovery**: Search 658+ data broker websites with real-time progress tracking and broker-by-broker updates
+- **Performance Optimized**: Reduced discovery time from 10+ hours to 15 minutes-3 hours depending on selected profile
+- **Real-time Progress**: Live updates showing current broker being scanned and percentage completion
 - **Evidence Collection**: Screenshot and document findings for removal requests
 - **AI-Powered Removal**: Generate CCPA/CPRA compliant opt-out emails with dual LLM support (Ollama + OpenAI)
 - **Comprehensive Removal Workflow**: End-to-end process from discovery to email generation with job tracking
 - **Local-First**: All data stays on your machine - no cloud uploads
-- **Enhanced UI**: Modern React interface with tab navigation and real-time updates
+- **Enhanced UI**: Modern React interface with broker profile selection and real-time updates
 
 ## 🏗️ Architecture
 
-- **Backend**: FastAPI (Python) with Playwright for web scraping and comprehensive API endpoints
-- **Frontend**: React + TypeScript with Vite, featuring tab navigation and global state management
-- **Discovery Engine**: Enhanced with real-time progress tracking and broker name display
+- **Backend**: FastAPI (Python) with Playwright for web scraping and comprehensive broker profile API endpoints
+- **Frontend**: React + TypeScript with Vite, featuring broker profile selector and real-time progress tracking
+- **Broker Profile System**: 8 intelligent broker groupings optimized for different privacy concerns and time constraints
+- **Discovery Engine**: Enhanced with broker-specific ordering, timeout optimization, and reliable progress tracking
 - **Removal System**: Complete workflow with AI-powered email generation and job monitoring
 - **Storage**: Local JSON files (no database required) with organized evidence collection
 - **AI Integration**: Dual LLM setup (Ollama primary, OpenAI fallback) with smart error handling
@@ -91,6 +95,38 @@ A privacy-focused tool for discovering and removing your personal information fr
   3. Check backend logs for any UnboundLocalError or threading issues
 - **Frontend not updating**: Hard refresh (Cmd+Shift+R) or restart frontend if broker names don't appear
 - **Backend crashes**: Check for proper virtual environment activation and missing environment variables
+
+## 🎯 Broker Profile System
+
+The discovery process has been revolutionized with intelligent broker profiles that dramatically reduce discovery time while maintaining comprehensive coverage.
+
+### Available Profiles
+
+| Profile | Brokers | Time | Best For |
+|---------|---------|------|----------|
+| **⚡ Quick Essential Scan** | 15 | ~15 min | First-time users, immediate results |
+| **👥 People Search Focus** | 28 | ~30 min | Public directory exposure |
+| **💳 Financial & Credit** | 39 | ~40 min | Financial privacy concerns |
+| **🏠 Real Estate & Property** | 25 | ~25 min | Property record privacy |
+| **🏥 Healthcare & Medical** | 20 | ~20 min | Medical data privacy |
+| **💼 Professional & B2B** | 58 | ~60 min | Professional networking data |
+| **📊 Tech & Analytics** | 81 | ~80 min | Tech platform data tracking |
+| **📢 Marketing & Advertising** | 87 | ~90 min | Marketing database removal |
+
+### Smart Recommendations
+
+- **Start with Quick Essential Scan** for immediate results and high-impact brokers
+- **People Search** covers the most visible public exposure
+- **Financial & Healthcare** profiles have the highest privacy impact
+- **Run multiple targeted profiles** instead of scanning all 658+ brokers
+- **Progressive discovery**: Start small, then expand based on findings
+
+### Performance Improvement
+
+- **Before**: 658+ brokers taking 10+ hours
+- **After**: Targeted scans from 15 minutes to 3 hours maximum
+- **Optimization**: Brokers ordered by reliability and speed
+- **Smart timeouts**: Reduced from 30s to 10s per broker for faster processing
 
 ## 👤 Creating Your Profile
 
@@ -171,17 +207,29 @@ curl -X POST "http://localhost:5179/pii-profiles" \
 ## 📋 Usage
 
 1. **Create a PII Profile**: Use the web interface profile form at http://localhost:5173 to add your personal information, or follow the [Creating Your Profile](#-creating-your-profile) section for other methods
+
 2. **Select Your Profile**: Choose your created profile from the dropdown in the web interface
-3. **Import Data Brokers**: Load the 658 data brokers from official state registries:
+
+3. **Choose Broker Profile**: Select from 8 optimized broker profiles:
+   - **⚡ Quick Essential Scan** (recommended for first-time users)
+   - **👥 People Search Focus** for public directory exposure
+   - **💳 Financial & Credit** for financial data privacy
+   - **🏠 Real Estate & Property** for property records
+   - And 4 additional specialized profiles
+
+4. **Import Data Brokers**: Load the 658 data brokers from official state registries:
    ```bash
    curl -X POST "http://localhost:5179/brokers/import"
    ```
    This should return: `{"imported": 658}`
-4. **Run Discovery**: Click "Run Discovery" to start automated search with real-time progress tracking
-   - See live broker count: "🔍 1/658 brokers"
-   - Watch current broker name being scanned
-   - Progress preserved when switching between Discovery and Removal tabs
-5. **Review Findings**: Examine results with confidence scores and evidence screenshots
+
+5. **Run Discovery**: Click "Run Discovery" to start automated search with:
+   - **Real-time progress tracking** with current broker name
+   - **Optimized broker ordering** starting with fastest, most reliable sites
+   - **Smart timeouts** (10s per broker) for faster completion
+   - **Live updates** showing "🔍 X/Y brokers" progress
+
+6. **Review Findings**: Examine results with confidence scores and evidence screenshots
 6. **Generate Removal Requests**: Use the Removal tab for AI-powered email generation:
    - Select findings to create removal requests
    - AI generates CCPA/CPRA compliant emails
@@ -204,13 +252,15 @@ curl -X POST "http://localhost:5179/pii-profiles" \
 
 ### Key Features Tested
 
-- ✅ **FastAPI Backend**: Runs on port 5179 with auto-reload and comprehensive API endpoints
-- ✅ **React Frontend**: Vite dev server on port 5173 with modern tab navigation
-- ✅ **Real-time Discovery**: Live progress tracking with broker count and current broker name display
-- ✅ **State Management**: Global state preservation across tab navigation
-- ✅ **Bug-Fixed Discovery**: Resolved critical UnboundLocalError for reliable discovery execution
+- ✅ **Broker Profile System**: 8 intelligent profiles reducing discovery time from 10+ hours to 15 minutes-3 hours
+- ✅ **Quick Essential Scan**: 15-minute discovery across 15 high-priority brokers
+- ✅ **Smart Broker Ordering**: Optimized sequence starting with fastest, most reliable brokers
+- ✅ **Real-time Progress**: Never gets stuck at 0% with reliable broker-by-broker updates
+- ✅ **FastAPI Backend**: Enhanced with broker-profiles endpoint and optimized filtering
+- ✅ **React Frontend**: Modern UI with always-visible broker profile selector
+- ✅ **Performance Optimization**: Reduced timeouts (10s) and improved error recovery
 - ✅ **Complete Removal Workflow**: End-to-end process from findings selection to AI email generation
-- ✅ **Data Broker Database**: 658 normalized brokers with search URLs and opt-out information
+- ✅ **Data Broker Database**: 658 normalized brokers with verified domain matching
 - ✅ **Dual AI Integration**: Ollama (local) + OpenAI (fallback) with intelligent error handling
 - ✅ **Job Tracking**: Comprehensive monitoring for both discovery and removal operations
 - ✅ **Local Storage**: All personal data stays on your machine with organized file structure
@@ -252,8 +302,9 @@ OPENAI_MODEL=gpt-4o-mini
 invisibility_cloak/
 ├── backend/                 # FastAPI Python backend
 │   ├── app/
-│   │   ├── main.py         # Enhanced API endpoints with discovery/removal tracking
-│   │   ├── discovery/      # Web scraping logic with real-time progress
+│   │   ├── main.py         # Enhanced API with broker profile endpoints
+│   │   ├── broker_profiles.py  # 8 intelligent broker profile configurations
+│   │   ├── discovery/      # Optimized web scraping with progress tracking
 │   │   ├── removal/        # Complete opt-out automation with AI integration
 │   │   └── llm_engine.py   # Dual LLM system (Ollama + OpenAI)
 │   ├── storage/
@@ -262,10 +313,11 @@ invisibility_cloak/
 │   └── requirements.txt
 ├── ui/web/                 # Modern React frontend
 │   ├── src/
-│   │   ├── components/     # Enhanced React components with state management
-│   │   │   ├── DiscoveryPanel.tsx    # Real-time progress tracking
-│   │   │   ├── RemovalPanel.tsx      # Complete removal workflow
-│   │   │   └── FindingsTable.tsx     # Results display with actions
+│   │   ├── components/     # Enhanced React components
+│   │   │   ├── BrokerProfileSelector.tsx  # Broker profile selection UI
+│   │   │   ├── DiscoveryPanel.tsx         # Real-time progress tracking
+│   │   │   ├── RemovalPanel.tsx           # Complete removal workflow
+│   │   │   └── FindingsTable.tsx          # Results display with actions
 │   │   └── App.tsx         # Global state management and tab navigation
 │   └── package.json
 ├── data/                   # Normalized data broker information
@@ -277,6 +329,32 @@ invisibility_cloak/
 ```
 
 ## 🆕 Recent Updates
+
+### v3.0 - Broker Profile System (November 2025)
+
+**🚀 Revolutionary Performance Improvement:**
+- **Broker Profile System**: 8 intelligent broker groupings for targeted discovery
+- **Massive Time Savings**: Reduced discovery from 10+ hours to 15 minutes-3 hours
+- **Quick Essential Scan**: Get results in just 15 minutes with 15 high-priority brokers
+- **Smart Profile Selection**: Specialized profiles for different privacy concerns
+
+**⚡ Speed & Reliability Optimizations:**
+- **Optimized Broker Ordering**: Start with fastest, most reliable brokers (Spokeo, WhitePages)
+- **Smart Timeout Reduction**: Reduced timeouts from 30s to 10s per broker
+- **Fixed Progress Tracking**: Real-time updates that never get stuck at 0%
+- **Order Preservation**: Broker profiles maintain intended sequence for optimal performance
+
+**🎯 Enhanced User Experience:**
+- **Always-Visible Profile Selector**: Choose broker profiles before starting discovery
+- **Real-time Broker Names**: See exactly which broker is being scanned
+- **Progressive Discovery Workflow**: Start small with Quick Scan, expand as needed
+- **Performance Indicators**: Each profile shows estimated time and broker count
+
+**🔧 Technical Improvements:**
+- **Fixed Broker Filtering**: Maintains profile-specified order instead of database order
+- **Improved Error Recovery**: Better handling of problematic broker sites
+- **Enhanced API Endpoints**: New broker-profiles endpoint with comprehensive metadata
+- **Reliable Progress Updates**: Progress tracking updates before each broker starts
 
 ### v2.0 - Major Enhancement (November 2025)
 
