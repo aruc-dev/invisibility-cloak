@@ -38,11 +38,23 @@ export default function DiscoveryPanel({
   }, [])
 
   function loadProfiles(){
-    fetch("http://127.0.0.1:5179/pii-profiles").then(r=>r.json()).then(setProfiles)
+    fetch("http://127.0.0.1:5179/pii-profiles")
+      .then(r => r.json())
+      .then(setProfiles)
+      .catch(error => {
+        console.error('Error loading PII profiles:', error)
+        alert('Failed to load PII profiles. Please try again.')
+      })
   }
 
   function loadBrokerProfiles(){
-    fetch("http://127.0.0.1:5179/broker-profiles").then(r=>r.json()).then(setBrokerProfiles)
+    fetch("http://127.0.0.1:5179/broker-profiles")
+      .then(r => r.json())
+      .then(setBrokerProfiles)
+      .catch(error => {
+        console.error('Error loading broker profiles:', error)
+        alert('Failed to load broker profiles. Please try again.')
+      })
   }
 
   function startDiscovery(){
