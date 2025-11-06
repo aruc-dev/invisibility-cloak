@@ -59,37 +59,35 @@ BROKER_PROFILES: Dict[str, Dict[str, Any]] = {
     },
     
     "financial_credit": {
-        "name": "Financial & Credit Services", 
-        "description": "Credit bureaus, financial services, and credit monitoring companies",
-        "priority": 5,
+        "name": "Financial & Credit Services",
+        "description": "Credit monitoring, financial services, and background check companies",
+        "priority": 4,
         "estimated_time": "45 minutes",
-        "broker_count": 35,
-        "color": "#45b7d1",
+        "broker_count": 39,
+        "color": "#27ae60",
         "icon": "💳",
         "brokers": [
-            # Credit bureaus & reporting
-            "acxiom.com", "experian.com", "equifax.com", "transunion.com",
-            "700credit.com", "ciccredit.com", "theworknumber.com",
+            # Credit monitoring services
+            "experian.com", "equifax.com", "transunion.com", "creditkarma.com",
+            "creditscore.com", "freecreditreport.com", "credit.com",
+            "smartcredit.com", "identityguard.com", "creditwise.com",
             
             # Financial data companies
-            "sagestreamllc.com", "partnerscredit.com", "innovis.com",
-            "chexsystems.com", "earlywarning.com", "lexisnexis.com",
+            "lexisnexis.com", "choicepoint.com", "kroll.com", "wolterskluwer.com",
+            "thomsonreuters.com", "riskdiscovery.com", "accurint.com",
             
-            # Credit monitoring & identity
-            "creditkarma.com", "creditsesame.com", "quizzle.com",
-            "freecreditscore.com", "myfico.com", "identityguard.com",
+            # Background check services
+            "backgroundchecks.com", "instantcheckmate.com", "truthfinder.com",
+            "checkr.com", "goodhire.com", "sterling.com", "hireright.com",
+            "backgroundinvestigation.com", "intelius.com",
             
-            # Financial services data
-            "corelogic.com", "firstam.com", "blackknight.com",
-            "epsilon.com", "merkle.com", "alliant.com",
+            # Identity verification
+            "jumio.com", "onfido.com", "trulioo.com", "veriff.com",
+            "idology.com", "socure.com", "alloy.com",
             
-            # Banking & lending data
-            "bankrate.com", "lendingtree.com", "nerdwallet.com",
-            "creditcards.com", "insurance.com", "quotewizard.com",
-            
-            # Investment & wealth data
-            "wealthx.com", "morningstar.com", "refinitiv.com",
-            "factset.com", "bloomberg.com"
+            # Financial marketing
+            "lendingtree.com", "creditcards.com", "nerdwallet.com",
+            "bankrate.com", "finder.com", "creditloan.com"
         ]
     },
     
@@ -98,7 +96,7 @@ BROKER_PROFILES: Dict[str, Dict[str, Any]] = {
         "description": "Ad networks, marketing data companies, and lead generation services", 
         "priority": 4,
         "estimated_time": "90 minutes",
-        "broker_count": 95,
+        "broker_count": 87,
         "color": "#96ceb4",
         "icon": "📢",
         "brokers": [
@@ -150,17 +148,16 @@ BROKER_PROFILES: Dict[str, Dict[str, Any]] = {
         ]
     },
     
-    "real_estate_property": {
+    "real_estate": {
         "name": "Real Estate & Property Data",
-        "description": "Property records, real estate marketing, and home services data",
+        "description": "Property records, real estate platforms, and home services",
         "priority": 3,
-        "estimated_time": "35 minutes", 
+        "estimated_time": "35 minutes",
         "broker_count": 25,
-        "color": "#f7dc6f",
+        "color": "#f39c12",
         "icon": "🏠",
         "brokers": [
-            # Property data companies
-            "propertyradar.com", "propertyreach.com", "attomdata.com",
+            # Major real estate MLS & data
             "corelogic.com", "firstam.com", "blackknight.com",
             
             # Real estate platforms
@@ -186,7 +183,7 @@ BROKER_PROFILES: Dict[str, Dict[str, Any]] = {
         "description": "Medical data companies, healthcare marketing, and wellness services",
         "priority": 5,
         "estimated_time": "25 minutes",
-        "broker_count": 18,
+        "broker_count": 20,
         "color": "#e74c3c",
         "icon": "🏥", 
         "brokers": [
@@ -213,7 +210,7 @@ BROKER_PROFILES: Dict[str, Dict[str, Any]] = {
         "description": "Business data, professional networks, and B2B lead generation",
         "priority": 3,
         "estimated_time": "70 minutes",
-        "broker_count": 55,
+        "broker_count": 58,
         "color": "#9b59b6",
         "icon": "💼",
         "brokers": [
@@ -260,7 +257,7 @@ BROKER_PROFILES: Dict[str, Dict[str, Any]] = {
         "description": "Technology companies, data analytics platforms, and AI/ML services",
         "priority": 2,
         "estimated_time": "120 minutes",
-        "broker_count": 85,
+        "broker_count": 81,
         "color": "#34495e",
         "icon": "🤖",
         "brokers": [
