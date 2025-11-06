@@ -25,7 +25,7 @@ export const BrokerProfileSelector: React.FC<BrokerProfileSelectorProps> = ({
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
-        const response = await fetch('http://localhost:5179/broker-profiles');
+        const response = await fetch('http://127.0.0.1:5179/broker-profiles');
         if (response.ok) {
           const data = await response.json();
           setProfiles(data);
