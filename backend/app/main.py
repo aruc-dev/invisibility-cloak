@@ -226,29 +226,13 @@ def mark_false_positive(job_id: str, request: dict):
 
 @app.post("/discovery/{job_id}/verify-positive")
 def verify_positive(job_id: str, request: dict):
-    """Verify a broker result as a true positive"""
-    print(f"Verifying broker {request['broker_id']} as true positive for job {job_id}")
-    
-    findings_file = STORE_DIR / "findings.json"
-    if findings_file.exists():
-        findings = json.loads(findings_file.read_text())
-        
-        # Find and update the specific result
-        for result in findings.get(job_id, []):
-            if result.get('broker_id') == request['broker_id']:
-                result['verified_positive'] = True
-                result['confidence'] = min(1.0, result.get('confidence', 0.5) + 0.2)  # Boost confidence
-                break
-        
-        findings_file.write_text(json.dumps(findings, indent=2))
-        print(f"Successfully verified broker {request['broker_id']} as true positive")
-        return {"success": True}
-    
-    return {"success": False, "error": "Findings not found"}
-
-@app.post("/discovery/{job_id}/verify-positive")  
-def verify_positive(job_id: str, broker_id: int):
     """Mark a discovery result as verified true positive"""
+    broker_id = request.get('broker_id')
+    if broker_id is None:
+         return JSONResponse({"error": "broker_id required"}, status_code=400)
+
+    print(f"Verifying broker {broker_id} as true positive for job {job_id}")
+
     jobs = load_json(FINDINGS_JSON, {})
     if job_id not in jobs:
         return JSONResponse({"error": "job not found"}, status_code=404)
@@ -256,19 +240,24 @@ def verify_positive(job_id: str, broker_id: int):
     job = jobs[job_id]
     items = job.get("items", [])
     
+    found = False
     # Find and update the item
     for item in items:
         if item.get("broker_id") == broker_id:
             item["verified_positive"] = True
             item["confidence"] = min(1.0, item.get("confidence", 0.5) + 0.2)  # Boost confidence
             item["notes"] = (item.get("notes", "") + " [VERIFIED_BY_USER]").strip()
+            found = True
             break
+
+    if found:
+        # Save updated job
+        jobs[job_id] = job
+        save_json(FINDINGS_JSON, jobs)
+        print(f"Successfully verified broker {broker_id} as true positive")
+        return {"success": True, "message": f"Marked broker {broker_id} as verified positive"}
     
-    # Save updated job
-    jobs[job_id] = job
-    save_json(FINDINGS_JSON, jobs)
-    
-    return {"success": True, "message": f"Marked broker {broker_id} as verified positive"}
+    return {"success": False, "error": "Broker result not found"}
 
 
 def _run_discovery(job_id: str, profile_id: str, scope: Optional[List[int]], broker_profile: str = "all_brokers"):
