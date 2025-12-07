@@ -21,7 +21,7 @@ class EmailGeneric(RemovalConnector):
         pii = self.pii
         prompt = EMAIL_TEMPLATE_PROMPT.format(broker=broker.get("name"), domain=broker.get("domain"), pii=str({k:pii.get(k) for k in ['names','emails','phones','addresses']}))
         body = smart_llm(prompt)
-        drafts = Path(__file__).resolve().parents[2] / "storage" / "drafts"
+        drafts = Path(__file__).resolve().parents[4] / "storage" / "drafts"
         drafts.mkdir(parents=True, exist_ok=True)
         fname = drafts / f"optout_{broker.get('domain','broker')}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.txt"
         fname.write_text(body)

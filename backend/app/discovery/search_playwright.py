@@ -110,7 +110,7 @@ def handle_overlays_sync(page):
     except:
         pass
 
-def token_hits(html: str, pii: dict, strict_mode: bool = True) -> int:
+def token_hits(html: str, pii: dict) -> int:
     """
     Calculate hits with improved logic to reduce false positives
     """
@@ -396,7 +396,7 @@ def search_broker(broker: dict, pii: dict, evidence_dir: str = "/tmp") -> dict:
                         print(f"    ❌ Page doesn't appear to show search results")
                         continue
                     
-                    hits = token_hits(html, pii, strict_mode=True)
+                    hits = token_hits(html, pii)
                     print(f"    📊 Found {hits} hits on this page")
                     
                     if hits > max_hits:

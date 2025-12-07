@@ -21,7 +21,7 @@ class GenericForm(RemovalConnector):
             return {"status":"error","transcript":"No opt-out URL","evidence_path":None}
 
         # Setup evidence directory
-        store_dir = Path(__file__).resolve().parents[3] / "storage"
+        store_dir = Path(__file__).resolve().parents[4] / "storage"
         evidence_dir = store_dir / "evidence" / "removals"
         evidence_dir.mkdir(parents=True, exist_ok=True)
 
